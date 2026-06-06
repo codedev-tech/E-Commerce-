@@ -46,7 +46,17 @@ const useCartStore = create(
       getItemCount: () =>
         get().items.reduce((sum, i) => sum + i.quantity, 0),
     }),
-    { name: 'cart-storage' }
+    {
+      name: 'cart-storage',
+      // Drop stale items whose product.id is missing or not a string (pre-migration cache)
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.items = state.items.filter(
+            (i) => i?.product?.id && typeof i.product.id === 'string'
+          );
+        }
+      },
+    }
   )
 );
 
